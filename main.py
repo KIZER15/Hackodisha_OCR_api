@@ -12,7 +12,7 @@ import google.generativeai as genai
 # ---------- CORS Setup ----------
 # Development: allow all origins
 # Production: restrict to trusted domains only
-allow_origins = ["*"]
+allow_origins = ["*"]  # ✅ allows all origins during development
 # Example for production:
 # allow_origins = [
 #     "http://localhost:3000",    # Local frontend
@@ -28,9 +28,13 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 # ---------- FastAPI App ----------
-app = FastAPI(title="Gemini OCR API", description="Extract certificate info from images", version="1.0")
+app = FastAPI(
+    title="Gemini OCR API",
+    description="Extract certificate info from images",
+    version="1.0"
+)
 
-# Add CORS middleware
+# ---------- Add CORS Middleware ----------
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
