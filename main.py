@@ -4,9 +4,20 @@ import json
 import re
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
+
+# ---------- CORS Setup ----------
+# Development: allow all origins
+# Production: restrict to trusted domains only
+allow_origins = ["*"]
+# Example for production:
+# allow_origins = [
+#     "http://localhost:3000",    # Local frontend
+#     "https://your-frontend-domain.com"  # Deployed frontend
+# ]
 
 # ---------- Load environment variables ----------
 load_dotenv()
@@ -19,7 +30,16 @@ genai.configure(api_key=GEMINI_API_KEY)
 # ---------- FastAPI App ----------
 app = FastAPI(title="Gemini OCR API", description="Extract certificate info from images", version="1.0")
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
+# ---------- Core Function ----------
 def extract_with_gemini(image_bytes: bytes):
     image_data = base64.b64encode(image_bytes).decode("utf-8")
 
@@ -62,6 +82,7 @@ Only return JSON.
     return data
 
 
+# ---------- API Endpoint ----------
 @app.post("/extract/")
 async def extract_certificate(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
