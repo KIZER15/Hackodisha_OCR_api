@@ -49,7 +49,18 @@ def extract_with_gemini(image_bytes: bytes):
 
     prompt = """
 You are an expert OCR and information extraction system.
-Carefully read the text from the given image and extract the following fields:
+First, carefully check whether the given image is an educational marksheet or certificate 
+(i.e., it should clearly contain information like name, roll number, course, branch, grades, 
+or other educational details).
+
+If it is NOT an educational certificate/marksheet (for example, a random photo, ID card, 
+bill, receipt, or unrelated document), return the following JSON exactly:
+
+{
+  "error": "Please enter an educational certificate."
+}
+
+If it IS an educational certificate/marksheet, extract the following fields:
 - Name
 - Roll Number
 - Course
@@ -66,6 +77,7 @@ If a field is missing in the image, set its value to null.
 Do not add extra commentary or explanation.
 Only return JSON.
 """
+
 
     model = genai.GenerativeModel("gemini-2.5-flash")
     response = model.generate_content(
